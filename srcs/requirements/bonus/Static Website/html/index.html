@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Inception Project Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        section:last-child {
+            border-bottom: none;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #34495e;
+            font-size: 1.4em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .highlight-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .architecture-info {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .architecture-info ol {
+            line-height: 1.6;
+        }
+
+        .architecture-info li {
+            margin-bottom: 10px;
+        }
+
+        .architecture-info li:last-child {
+            margin-bottom: 0;
+        }
+
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 50px;
+        }
+
+        footer p {
+            margin: 0;
+            text-align: center;
+        }
+
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #5dade2;
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🐋 Inception Project</h1>
+            <p>System Administration with Docker</p>
+        </header>
+
+        <div class="content">
+            <section id="overview">
+                <h2>Project Overview</h2>
+                <p>
+                    The Inception project is a comprehensive system administration exercise focused on
+                    containerization and infrastructure setup using Docker technology. The goal is to
+                    create a small but complete infrastructure composed of multiple services, each
+                    running in dedicated containers.
+                </p>
+
+                <div class="highlight-box">
+                    <h3>Core Requirements</h3>
+                    <ul>
+                        <li><strong>NGINX:</strong> Web server configured with TLSv1.2/TLSv1.3 for secure HTTPS
+                            connections</li>
+                        <li><strong>WordPress:</strong> CMS with php-fpm</li>
+                        <li><strong>MariaDB:</strong> Database server for WordPress</li>
+                        <li><strong>Redis:</strong> In-memory caching server to accelerate WordPress performance</li>
+                        <li><strong>FTP:</strong> File Transfer Protocol server for remote file management</li>
+                        <li><strong>Adminer:</strong> Web-based database administration tool for MariaDB</li>
+                        <li><strong>Volumes:</strong> Persistent storage for database and website files</li>
+                        <li><strong>Docker Network:</strong> Secure communication between containers</li>
+                    </ul>
+                </div>
+
+                <div class="architecture-info">
+                    <strong>Key Constraint:</strong> NGINX container serves as the sole entry point
+                    to the infrastructure, accessible only via port 443 with TLS encryption.
+                </div>
+            </section>
+
+            <section id="docker">
+                <h2>Docker & Containerization</h2>
+                <p>
+                    Docker is an open platform for developing, shipping, and running applications that fundamentally
+                    changes how we manage infrastructure. It enables you to package and run applications in lightweight,
+                    isolated environments called containers. Unlike traditional virtual machines that require a full
+                    operating system for each instance, containers share the host's kernel while maintaining isolation,
+                    making them significantly more efficient and faster to start. Each container includes everything
+                    needed to run the application—code, runtime, libraries, and dependencies—ensuring consistency across
+                    different environments without relying on what's installed on the host.
+                </p>
+                <p>
+                    The power of Docker lies in its portability and consistency. Containers can run seamlessly on a
+                    developer's laptop, physical or virtual machines in data centers, cloud providers, or any mixture of
+                    environments. This portability enables reliable workflows: development teams write code in Docker
+                    environments, push containers for testing, and when bugs are discovered, they can quickly fix issues
+                    and redeploy the updated container with confidence that it will work identically everywhere. This
+                    approach, known as continuous delivery, eliminates the classic "it works on my machine" problem. By
+                    containerizing applications with all their dependencies, this project leverages Docker to create an
+                    isolated, reproducible, and scalable infrastructure that can be shared and deployed with guaranteed
+                    consistency.
+                </p>
+
+                <h3>Why Docker?</h3>
+                <ul>
+                    <li><strong>Isolation:</strong> Each service runs in its own container with dedicated resources</li>
+                    <li><strong>Portability:</strong> The entire infrastructure can be deployed anywhere</li>
+                    <li><strong>Efficiency:</strong> Containers share the host OS kernel, reducing overhead</li>
+                    <li><strong>Reproducibility:</strong> Infrastructure as code ensures consistent deployments</li>
+                </ul>
+
+                <h3>Implementation Details</h3>
+                <p>
+                    All Docker images are built from scratch using custom Dockerfiles based on Alpine or Debian. The
+                    project uses Docker Compose to orchestrate multiple containers, defining services, networks, and
+                    volumes in a single configuration file. Each container is designed to run a single process as PID 1,
+                    following Docker best practices. A Makefile automates the entire deployment workflow, handling data
+                    directory creation, container orchestration, and cleanup operations for consistent and reproducible
+                    deployments.
+                </p>
+
+            </section>
+
+            <section id="vault">
+                <h2>Vault - Secret Management (Additional Service)</h2>
+                <p>
+                    HashiCorp Vault was chosen as an additional bonus service to provide secure,
+                    centralized secret management for the infrastructure. This addresses a critical
+                    security concern in containerized environments.
+                </p>
+
+                <h3>Why Vault?</h3>
+                <ul>
+                    <li><strong>Security:</strong> Secrets are encrypted at rest and in transit</li>
+                    <li><strong>Centralized Management:</strong> Single source of truth for all credentials</li>
+                    <li><strong>Dynamic Secrets:</strong> Can generate credentials on-demand with automatic expiration
+                    </li>
+                    <li><strong>Audit Logging:</strong> Complete audit trail of secret access</li>
+                    <li><strong>Access Control:</strong> Fine-grained policies control who can access what</li>
+                </ul>
+
+                <h3>Implementation</h3>
+                <p>
+                    Vault runs as a dedicated container in the infrastructure. Instead of hardcoding
+                    passwords in environment variables or files, sensitive credentials (database passwords,
+                    API keys, SSL certificates) are stored in Vault's encrypted storage.
+                </p>
+
+                <div class="architecture-info">
+                    <strong>Security Flow:</strong>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Services authenticate with Vault using the AppRole method for automated credential retrieval
+                        </li>
+                        <li>Vault generates TLS certificates signed by a Vault-managed root CA, enabling certificate
+                            revocation, expiration checks, and centralized trust management</li>
+                        <li>Database credentials are dynamically generated with short lifespans and can be revoked
+                            instantly in case of breaches or team member departures</li>
+                        <li>Vault verifies identities, enforces access policies, and grants only the necessary secrets
+                            to each service</li>
+                        <li>All secrets are injected at runtime and never stored in container images or configuration
+                            files</li>
+                        <li>In case of security incidents or credential leaks, Vault can be sealed to prevent access
+                            until the situation is resolved</li>
+                    </ol>
+                </div>
+
+                <p>
+                    This approach eliminates the risk of accidentally committing secrets to Git,
+                    provides rotation capabilities for credentials, and offers a professional-grade
+                    solution for managing sensitive data in production environments.
+                </p>
+            </section>
+            
+            <section id="Areas for Improvement">
+                <h2>Areas for Improvement</h2>
+                <div class="architecture-info">
+                    <p>While this project demonstrates a functional containerized infrastructure, several security
+                        enhancements could be implemented in a production environment:</p>
+    
+                    <h3 style="margin-top: 15px; margin-bottom: 10px;">Security Hardening</h3>
+                    <ul style="margin-left: 20px; line-height: 1.6;">
+                        <li><strong>Non-Root Container Users:</strong> Containers should run as non-privileged users instead
+                            of root to minimize the impact of potential container breakouts and follow the principle of
+                            least privilege.</li>
+    
+                        <li><strong>Vault Root Token Management:</strong> The root token should be revoked after initial
+                            setup and authentication should rely solely on AppRole or other secure methods. Root tokens
+                            should never be left accessible in production environments.</li>
+    
+                        <li><strong>Encrypted Communication:</strong>
+                            <ul style="margin-left: 20px; margin-top: 5px;">
+                                <li>Vault communication should use TLS/SSL encryption to protect secrets in transit</li>
+                                <li>FTP should be replaced with SFTP or FTPS to encrypt file transfers</li>
+                            </ul>
+                        </li>
+    
+                        <li><strong>Secret Rotation:</strong> Implement automated secret rotation policies for long-lived
+                            credentials and certificates.</li>
+                    </ul>
+    
+                </div>
+            </section>
+        
+        </div>
+
+        <footer>
+            <p>
+                Inception Project Documentation |
+                <a href="https://www.42network.org/" target="_blank">42 School</a> |
+                <a href="https://1337.ma/" target="_blank">1337</a> |
+                System Administration
+            </p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/Yassine-Mafamane/Inception" target="_blank">
+                    View on GitHub
+                </a>
+            </p>
+        </footer>
+    </div>
+</body>
+
+</html>

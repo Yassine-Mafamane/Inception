@@ -1,0 +1,10 @@
+# escape=`
+
+FROM	alpine:3.21
+
+RUN apk update && `
+    apk add --no-cache php php83-session php-mysqli
+
+ADD https://www.adminer.org/latest.php /var/www/html/index.php
+
+ENTRYPOINT [ "php", "-S", "0.0.0.0:8080", "-t", "/var/www/html/" ]

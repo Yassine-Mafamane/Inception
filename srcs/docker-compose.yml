@@ -1,0 +1,214 @@
+name: inception
+
+configs:
+  nginx_config:
+    file: ./requirements/nginx/conf/nginx.conf
+  ymafaman.42.fr:
+    file: ./requirements/nginx/conf/ymafaman.conf
+  vault_config:
+    file: ./requirements/bonus/Vault/Configs/server-config.hcl
+
+volumes:
+    wp-volume:
+      driver_opts:
+        type: none
+        o: bind
+        device: "/home/${USER}/data/wordpress/"
+    db-volume:
+      driver_opts:
+        type: none
+        o: bind
+        device: "/home/${USER}/data/db/"
+    vault-volume:
+      driver_opts:
+        type: none
+        o: bind
+        device: "/home/${USER}/data/vault-data/"
+    vault-logs:
+      driver_opts:
+        type: none
+        o: bind
+        device: "/home/${USER}/data/vault-logs/"
+    vault-creds:
+      driver_opts:
+        type: none
+        o: bind
+        device: "/home/${USER}/data/vault-creds/"
+    vault-nginx-creds:
+      driver_opts:
+        type: none
+        o: bind
+        device: "/home/${USER}/data/vault-creds/nginx/"
+    vault-wp-creds:
+      driver_opts:
+        type: none
+        o: bind
+        device: "/home/${USER}/data/vault-creds/wordpress/"
+
+networks:
+  global:
+    driver: bridge
+    attachable: false
+
+services:
+  nginx:
+    build: ./requirements/nginx
+    image:  inception_nginx:ymafaman
+    hostname: webserv
+    environment:
+      - VAULT_SERVER_NAME=${VAULT_SERVER_NAME:-vault-server}
+      - VAULT_PORT=${VAULT_PORT:-8200}
+    ports:
+      - 443:443
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
+        mode: 0444
+      - source: ymafaman.42.fr
+        target: /etc/nginx/http.d/ymafaman.conf
+        mode: 0444
+    volumes:
+      - wp-volume:/var/www/html
+      - vault-nginx-creds:/var/vault-creds
+    depends_on:
+      - wordpress
+    networks:
+      - global
+    restart: on-failure
+
+  wordpress:
+    build: ./requirements/wordpress
+    image:  inception_wordpress:ymafaman
+    hostname: wordpress
+    environment:
+      - DB_NAME=${DB_NAME:?}
+      - VAULT_SERVER_NAME=${VAULT_SERVER_NAME:-vault-server}
+      - VAULT_PORT=${VAULT_PORT:-8200}
+    expose:
+      - 9000
+    volumes:
+      - wp-volume:/var/www/html
+      - vault-wp-creds:/var/vault-creds
+    networks:
+      - global
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      vault-boostraper:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+    restart: on-failure
+
+  mariadb:
+    build: ./requirements/mariadb
+    image:  inception_mariadb:ymafaman
+    hostname: mariadb
+    environment:
+      - MARIADB_ROOT_PW=${MARIADB_ROOT_PW:?}
+      - DB_NAME=${DB_NAME:?}
+    expose:
+      - 3306
+    volumes:
+      - db-volume:/var/lib/mysql
+    networks:
+      - global
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 5
+      start_period: 15s
+      start_interval: 2s
+    
+  vault-server:
+    build:  ./requirements/bonus/Vault
+    image:  inception_vault-server:ymafaman
+    hostname: vault-server
+    ports:
+      - 8200:8200
+    expose:
+      - 8200
+    volumes:
+      - vault-volume:/var/lib/vault/data
+      - vault-logs:/var/lib/vault-logs/
+    configs:
+      - source: vault_config
+        target: /etc/vault.d/server-config.hcl
+        mode: 0444
+    networks:
+      - global
+    restart: on-failure
+    depends_on:
+      mariadb:
+        condition: service_healthy
+        
+  vault-boostraper:
+    build: ./requirements/bonus/Vault-Bootstraper
+    image:  inception_vault-bootstraper:ymafaman
+    environment:
+      - MARIADB_ROOT_PW=${MARIADB_ROOT_PW:?}
+      - DB_NAME=${DB_NAME:?}
+      - VAULT_SERVER_NAME=${VAULT_SERVER_NAME:-vault-server}
+      - VAULT_PORT=${VAULT_PORT:-8200}
+      - USERPASS_USER_NAME=${USERPASS_USER_NAME:?}
+      - USERPASS_PASSWORD=${USERPASS_PASSWORD:?}
+      - WP_ADMIN_USERNAME=${WP_ADMIN_USERNAME:?}
+      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL:?}
+      - WP_AUTHOR_USERNAME=${WP_AUTHOR_USERNAME:?}
+      - WP_AUTHOR_EMAIL=${WP_AUTHOR_EMAIL:?}
+    volumes:
+      - vault-creds:/var/vault-creds
+    networks:
+      - global
+    restart: on-failure
+    depends_on:
+      - vault-server
+
+  redis:
+    build: ./requirements/bonus/redis
+    image:  inception_redis:ymafaman
+    hostname: redis
+    expose:
+      - 6379
+    networks:
+      - global
+    restart: on-failure
+
+  adminer:
+    build: ./requirements/bonus/adminer
+    image:  inception_adminer:ymafaman
+    hostname: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - global
+    restart: on-failure
+    depends_on:
+      mariadb:
+        condition: service_healthy
+  
+  ftp:
+    build: ./requirements/bonus/ftp
+    image:  inception_ftp:ymafaman
+    hostname: ftp
+    environment:
+      - FTP_LOCAL_USER=${FTP_LOCAL_USER:?}
+      - FTP_USER_PW=${FTP_USER_PW:?}
+    ports:
+      - 2121:21
+      - "21100-21110:21100-21110"
+    networks:
+      - global
+    restart: on-failure
+    depends_on:
+      - wordpress
+    volumes:
+      - wp-volume:/var/www/html
+
+  static-web-app:
+    build: ./requirements/bonus/Static Website
+    image:  inception_static-app:ymafaman
+    ports:
+      - 3334:3334
+    restart: on-failure

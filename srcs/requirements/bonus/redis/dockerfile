@@ -1,0 +1,10 @@
+# escape=`
+
+FROM	alpine:3.21
+
+RUN		apk update && `
+		apk add --no-cache redis
+
+COPY ./config/redis.conf /etc/redis.conf
+
+ENTRYPOINT [ "redis-server", "/etc/redis.conf" ]
